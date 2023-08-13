@@ -1,8 +1,10 @@
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import express, { Express, NextFunction, Request, Response } from "express";
+import moment from "moment-timezone";
 import path from "path";
 import { KerasModel, loadKerasModel } from "./model";
+
 const app: Express = express();
 let kerasModel: KerasModel = null;
 
@@ -16,7 +18,9 @@ app.get("/next-candle-xgboost", async (req, res, next) => {
   try {
     // kerasModel.closeModel.predict()
     // const today = await
+    const today = moment().tz("Asia/Ho_Chi_Minh");
     return res.status(200).json({
+      date: today,
       high: 10000,
       low: 9900,
       close: 9956,
