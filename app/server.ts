@@ -1,14 +1,24 @@
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import express, { Express, NextFunction, Request, Response } from "express";
+import http from "http";
 import moment from "moment-timezone";
 import path from "path";
-import { KerasModel, loadKerasModel } from "./model";
-
+import { Server } from "socket.io";
+import { KerasModel } from "./model";
+import { onConnection } from "./socket";
 const app: Express = express();
+const server = http.createServer(app);
+
+const clientIO = new Server(server, {
+  cors: {
+    origin: "*",
+  },
+});
+
 let kerasModel: KerasModel = null;
 
-app.use(cors());
+app.use(cors({ origin: "*" }));
 app.use(express.json());
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: false }));
@@ -20,7 +30,7 @@ app.get("/next-candle-xgboost", async (req, res, next) => {
     // const today = await
     const today = moment().tz("Asia/Ho_Chi_Minh");
     return res.status(200).json({
-      date: today,
+      step: today,
       high: 10000,
       low: 9900,
       close: 9956,
@@ -29,6 +39,10 @@ app.get("/next-candle-xgboost", async (req, res, next) => {
   } catch (error) {
     return next(error);
   }
+});
+
+app.get("/test-socket", async (req, res, next) => {
+  res.sendFile(__dirname + "/public/index.html");
 });
 
 app.use((req, res) => {
@@ -48,10 +62,10 @@ app.use((err: any, req: Request, res: Response, next: NextFunction) => {
 const connectDBAndStartServer = async () => {
   const port = process.env.PORT || 3000;
   try {
-    kerasModel = await loadKerasModel();
-    app.listen(port, () => {
+    server.listen(port, () => {
       console.log(`Listening on port ${port}`);
     });
+    clientIO.on("connection", (socket) => onConnection(clientIO, socket));
   } catch (err) {
     console.log(err);
   }
