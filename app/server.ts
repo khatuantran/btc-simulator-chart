@@ -6,9 +6,18 @@ import moment from "moment-timezone";
 import path from "path";
 import { Server } from "socket.io";
 import { KerasModel } from "./model";
-import { onConnection } from "./socket";
+import { TradingStep, createSocketBinance, onConnection } from "./socket";
+import { CustomClientResponseData, configGlobalBtcByDuration } from "./util";
+
 const app: Express = express();
 const server = http.createServer(app);
+
+export const CandleByDuration: Record<TradingStep, Array<CustomClientResponseData>> = {
+  [TradingStep.Second]: [],
+  [TradingStep.Minute]: [],
+  [TradingStep.Hour]: [],
+  [TradingStep.Day]: [],
+};
 
 const clientIO = new Server(server, {
   cors: {
@@ -17,7 +26,6 @@ const clientIO = new Server(server, {
 });
 
 let kerasModel: KerasModel = null;
-
 app.use(cors({ origin: "*" }));
 app.use(express.json());
 app.use(cookieParser());
@@ -62,6 +70,8 @@ app.use((err: any, req: Request, res: Response, next: NextFunction) => {
 const connectDBAndStartServer = async () => {
   const port = process.env.PORT || 3000;
   try {
+    const tradingData = await configGlobalBtcByDuration();
+    createSocketBinance(tradingData);
     server.listen(port, () => {
       console.log(`Listening on port ${port}`);
     });

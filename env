@@ -1,1 +1,2 @@
-BINANCE_BASE_END_POINT=
+BINANCE_BASE_END_POINT=wss://stream.binance.com:9443
+BINANCE_REST_END_POINT=https://api1.binance.com

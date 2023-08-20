@@ -21,12 +21,16 @@
   var socket = io();
   // topic join room - presentationId - slideId
   const socketClick = () => {
-      socket.emit("trade", {
-      step: "1s"
-    }, (arg) => console.log(arg))
+      socket.emit("trade-by-second", (arg) => console.log(arg))
+      socket.emit("trade-by-minute", (arg) => console.log(arg))
+      socket.emit("trade-by-hour", (arg) => console.log(arg))
+      socket.emit("trade-by-day", (arg) => console.log(arg))
   }
 
-  socket.on("new-data", (arg) => console.log(arg))
+  socket.on("trade-by-second", (arg) => console.log(arg))
+  socket.on("trade-by-minute", (arg) => console.log("trade-by-minute", arg))
+  socket.on("trade-by-hour", (arg) => console.log("trade-by-hour", arg))
+  socket.on("trade-by-day", (arg) => console.log("trade-by-day",arg))
 
 
   //lắng nghe thay đổi topic stat
